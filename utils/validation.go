@@ -1,8 +1,8 @@
 package utils
 
 import (
-	"regexp"                 // Import package regexp untuk ekspresi reguler
-	"golang.org/x/crypto/bcrypt" // Import package bcrypt untuk hashing password
+	"regexp"              
+	"golang.org/x/crypto/bcrypt" // hashing password
 )
 
 // IsValidEmail digunakan untuk memeriksa apakah alamat email yang diberikan valid.
@@ -12,7 +12,7 @@ func IsValidEmail(email string) bool {
 	return emailRegex.MatchString(email)
 }
 
-// HashPassword digunakan untuk meng-hash password yang diberikan menggunakan bcrypt.
+// HashPassword --> untuk meng-hash password yang diberikan menggunakan bcrypt.
 func HashPassword(password string) (string, error) {
 	// Generate hashed password menggunakan bcrypt
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)

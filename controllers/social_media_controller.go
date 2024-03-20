@@ -1,4 +1,4 @@
-// package controllers: Package yang berisi fungsi-fungsi untuk meng-handle request HTTP terkait dengan fitur social media dalam aplikasi.
+package controllers
 
 import (
 	"github.com/gin-gonic/gin" // Mengimport library gin yang digunakan untuk membuat server HTTP dengan Go.
@@ -32,4 +32,6 @@ func GetSocialMedias(c *gin.Context) {
 
 	// socialMedias := models.GetSocialMedias() // Mendapatkan daftar social media dari database.
 
-	// Re
+	// Return social medias as response
+	// Di sini biasanya daftar social media yang telah didapatkan akan dikirimkan kembali
+}

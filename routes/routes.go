@@ -1,52 +1,73 @@
-// package routes: Package yang berisi definisi routing untuk API endpoints.
+package routes
 
 import (
-	"github.com/gin-gonic/gin" // Mengimport package gin untuk membuat router HTTP.
-	"myGram/controllers" // Mengimport package controllers yang berisi fungsi-fungsi untuk menangani permintaan HTTP.
-	"myGram/middleware" // Mengimport package middleware untuk menambahkan middleware ke rute.
+    "github.com/gin-gonic/gin"
+    "myGram/controllers"
+    "myGram/middleware"
+    "gorm.io/gorm"
 )
 
-// SetupRoutes mengonfigurasi semua rute API.
-func SetupRoutes(router *gin.Engine) {
-	// Rute untuk registrasi pengguna dan login.
-	router.POST("/users/register", controllers.RegisterUser)
-	router.POST("/users/login", controllers.LoginUser)
+// SetupRoutes mengatur semua rute aplikasi.
+func SetupRoutes(router *gin.Engine, db *gorm.DB) {
+    // Definisikan rute untuk register dan login pengguna
+    router.POST("/users/register", gin.WrapF(func(c *gin.Context) {
+        controllers.RegisterUser(c, db)
+    }))
+    router.POST("/users/login", gin.WrapF(func(c *gin.Context) {
+        controllers.LoginUser(c, db)
+    }))
 
-	// Rute untuk operasi pengguna (update dan hapus) dengan autentikasi middleware.
-	userRoutes := router.Group("/users")
-	userRoutes.Use(middleware.AuthMiddleware())
-	{
-		userRoutes.PUT("/:userId", controllers.UpdateUser) // Rute untuk memperbarui pengguna.
-		userRoutes.DELETE("/", controllers.DeleteUser)    // Rute untuk menghapus pengguna.
-	}
+    // Inisialisasi grup rute pengguna dengan middleware otentikasi
+    userRoutes := router.Group("/users")
+    userRoutes.Use(middleware.AuthMiddleware())
+    {
+        userRoutes.PUT("/:userId", gin.WrapF(func(c *gin.Context) {
+            controllers.UpdateUser(c, db)
+        }))
+        userRoutes.DELETE("/:userId", gin.WrapF(func(c *gin.Context) {
+            controllers.DeleteUser(c, db)
+        }))
+    }
 
-	// Rute untuk operasi foto (buat, baca, update, hapus) dengan autentikasi middleware dan otorisasi foto middleware.
-	photoRoutes := router.Group("/photos")
-	photoRoutes.Use(middleware.AuthMiddleware())
-	{
-		photoRoutes.POST("/", controllers.CreatePhoto) // Rute untuk membuat foto baru.
-		photoRoutes.GET("/", controllers.GetPhotos)    // Rute untuk mendapatkan daftar foto.
-		photoRoutes.PUT("/:photoId", middleware.AuthorizePhoto(), controllers.UpdatePhoto) // Rute untuk memperbarui foto dengan otorisasi.
-		photoRoutes.DELETE("/:photoId", middleware.AuthorizePhoto(), controllers.DeletePhoto) // Rute untuk menghapus foto dengan otorisasi.
-	}
+    // Inisialisasi grup rute foto dengan middleware otentikasi
+    photoRoutes := router.Group("/photos")
+    photoRoutes.Use(middleware.AuthMiddleware())
+    {
+        photoRoutes.POST("/", controllers.CreatePhoto(db))
+        photoRoutes.GET("/", controllers.GetPhotos(db))
+        photoRoutes.PUT("/:photoId", middleware.AuthorizePhoto(db, "update"), gin.WrapF(func(c *gin.Context) {
+            controllers.UpdatePhoto(c, db)
+        }))
+        photoRoutes.DELETE("/:photoId", middleware.AuthorizePhoto(db, "delete"), gin.WrapF(func(c *gin.Context) {
+            controllers.DeletePhoto(c, db)
+        }))
+    }
 
-	// Rute untuk operasi komentar (buat, baca, update, hapus) dengan autentikasi middleware dan otorisasi komentar middleware.
-	commentRoutes := router.Group("/comments")
-	commentRoutes.Use(middleware.AuthMiddleware())
-	{
-		commentRoutes.POST("/", controllers.CreateComment) // Rute untuk membuat komentar baru.
-		commentRoutes.GET("/", controllers.GetComments)    // Rute untuk mendapatkan daftar komentar.
-		commentRoutes.PUT("/:commentId", middleware.AuthorizeComment(), controllers.UpdateComment) // Rute untuk memperbarui komentar dengan otorisasi.
-		commentRoutes.DELETE("/:commentId", middleware.AuthorizeComment(), controllers.DeleteComment) // Rute untuk menghapus komentar dengan otorisasi.
-	}
+    // Inisialisasi grup rute komentar dengan middleware otentikasi
+    commentRoutes := router.Group("/comments")
+    commentRoutes.Use(middleware.AuthMiddleware())
+    {
+        commentRoutes.POST("/", middleware.AuthorizeComment(db, "create"), controllers.CreateComment(db))
+        commentRoutes.GET("/", controllers.GetComments(db))
+        commentRoutes.PUT("/:commentId", middleware.AuthorizeComment(db, "update"), gin.WrapF(func(c *gin.Context) {
+            controllers.UpdateComment(c, db)
+        }))
+        commentRoutes.DELETE("/:commentId", middleware.AuthorizeComment(db, "delete"), gin.WrapF(func(c *gin.Context) {
+            controllers.DeleteComment(c, db)
+        }))
+    }
 
-	// Rute untuk operasi media sosial (buat, baca, update, hapus) dengan autentikasi middleware dan otorisasi media sosial middleware.
-	socialMediaRoutes := router.Group("/socialmedias")
-	socialMediaRoutes.Use(middleware.AuthMiddleware())
-	{
-		socialMediaRoutes.POST("/", controllers.CreateSocialMedia) // Rute untuk membuat media sosial baru.
-		socialMediaRoutes.GET("/", controllers.GetSocialMedias)    // Rute untuk mendapatkan daftar media sosial.
-		socialMediaRoutes.PUT("/:socialMediaId", middleware.AuthorizeSocialMedia(), controllers.UpdateSocialMedia) // Rute untuk memperbarui media sosial dengan otorisasi.
-		socialMediaRoutes.DELETE("/:socialMediaId", middleware.AuthorizeSocialMedia(), controllers.DeleteSocialMedia) // Rute untuk menghapus media sosial dengan otorisasi.
-	}
+    // Inisialisasi grup rute media sosial dengan middleware otentikasi
+    socialMediaRoutes := router.Group("/socialmedias")
+    socialMediaRoutes.Use(middleware.AuthMiddleware())
+    {
+        socialMediaRoutes.POST("/", middleware.AuthorizeSocialMedia(db, "create"), controllers.CreateSocialMedia(db))
+        socialMediaRoutes.GET("/", controllers.GetSocialMedias(db))
+        socialMediaRoutes.PUT("/:socialMediaId", middleware.AuthorizeSocialMedia(db, "update"), gin.WrapF(func(c *gin.Context) {
+            controllers.UpdateSocialMedia(c, db)
+        }))
+        socialMediaRoutes.DELETE("/:socialMediaId", middleware.AuthorizeSocialMedia(db, "delete"), gin.WrapF(func(c *gin.Context) {
+            controllers.DeleteSocialMedia(c, db)
+        }))
+    }
 }

@@ -1,40 +1,83 @@
-// package controllers: Ini adalah package yang berisi implementasi dari berbagai fungsi yang digunakan untuk meng-handle request HTTP terkait dengan fitur-fitur dalam aplikasi.
+package controllers
 
 import (
-	"github.com/gin-gonic/gin" // Mengimport library gin yang digunakan untuk membuat server HTTP dengan Go.
-	"myGram/models"             // Mengimport package models yang berisi definisi model data aplikasi.
-	"myGram/utils"              // Mengimport package utils yang berisi utilitas yang digunakan dalam aplikasi.
+	"github.com/gin-gonic/gin"
+	"myGram/models"
+	"myGram/utils"
 )
 
 // CreatePhoto adalah fungsi untuk membuat foto baru.
 func CreatePhoto(c *gin.Context) {
-	var photo models.Photo // Mendeklarasikan variabel photo yang akan menampung data foto yang diterima dari client.
+	var photo models.Photo
 
-	// Memeriksa dan melakukan binding data JSON yang diterima dari client ke dalam variabel photo.
+	// Binding data JSON yang diterima dari client ke dalam variabel photo.
 	if err := c.ShouldBindJSON(&photo); err != nil {
-		utils.BadRequest(c, "Invalid request body") // Jika terjadi error dalam binding data, maka respon error dikirimkan kembali ke client.
+		utils.BadRequest(c, "Invalid request body")
 		return
 	}
 
-	// Implement validation and authorization logic here
-	// Di sini biasanya dilakukan validasi terhadap data foto dan juga otorisasi untuk menentukan apakah pengguna memiliki izin untuk membuat foto.
+	// Validasi data foto
+	if err := photo.Validate(); err != nil {
+		utils.BadRequest(c, err.Error())
+		return
+	}
 
-	// Save photo to database (models.CreatePhoto)
-	// Di sini biasanya dilakukan penyimpanan data foto ke dalam database dengan menggunakan fungsi CreatePhoto yang ada di dalam package models.
+	// Simpan foto ke database
+	if err := models.CreatePhoto(&photo); err != nil {
+		utils.InternalServerError(c, "Failed to create photo")
+		return
+	}
 
-	utils.Created(c, photo) // Mengirimkan respon berhasil ke client setelah foto berhasil dibuat.
+	utils.Created(c, photo)
 }
 
 // GetPhotos adalah fungsi untuk mendapatkan daftar foto.
 func GetPhotos(c *gin.Context) {
-	// Implement logic to retrieve photos from database
-	// Di sini biasanya dilakukan pengambilan data foto dari database menggunakan fungsi GetPhotos yang ada di dalam package models.
+	// Mendapatkan daftar foto dari database
+	photos, err := models.GetPhotos()
+	if err != nil {
+		utils.InternalServerError(c, "Failed to retrieve photos")
+		return
+	}
 
-	// photos := models.GetPhotos() // Mendapatkan daftar foto dari database.
-
-	// Return photos as response
-	// Di sini biasanya daftar foto yang telah didapatkan akan dikirimkan kembali sebagai respon ke client.
+	utils.OK(c, photos)
 }
 
-// Implement UpdatePhoto, DeletePhoto, and AuthorizePhoto middleware similarly
-// Fungsi ini biasanya digunakan untuk melakukan update, delete, dan otorisasi terhadap permintaan yang berkaitan dengan foto, seperti misalnya memastikan pengguna memiliki izin untuk mengedit atau menghapus foto.
+// UpdatePhoto adalah fungsi untuk mengupdate informasi foto.
+func UpdatePhoto(c *gin.Context) {
+	photoID := c.Param("photoId")
+	var updatedPhoto models.Photo
+
+	// Binding data JSON yang diterima dari client ke dalam variabel updatedPhoto.
+	if err := c.ShouldBindJSON(&updatedPhoto); err != nil {
+		utils.BadRequest(c, "Invalid request body")
+		return
+	}
+
+	// Validasi data foto yang diperbarui
+	if err := updatedPhoto.Validate(); err != nil {
+		utils.BadRequest(c, err.Error())
+		return
+	}
+
+	// Update informasi foto di database
+	if err := models.UpdatePhoto(photoID, &updatedPhoto); err != nil {
+		utils.InternalServerError(c, "Failed to update photo")
+		return
+	}
+
+	utils.OK(c, gin.H{"message": "Photo updated successfully"})
+}
+
+// DeletePhoto adalah fungsi untuk menghapus foto.
+func DeletePhoto(c *gin.Context) {
+	photoID := c.Param("photoId")
+
+	// Hapus foto dari database
+	if err := models.DeletePhoto(photoID); err != nil {
+		utils.InternalServerError(c, "Failed to delete photo")
+		return
+	}
+
+	utils.OK(c, gin.H{"message": "Photo deleted successfully"})
+}

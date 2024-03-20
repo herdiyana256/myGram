@@ -1,12 +1,13 @@
-// package controllers: Ini adalah package yang berisi implementasi dari berbagai fungsi yang digunakan untuk meng-handle request HTTP terkait dengan fitur-fitur dalam aplikasi.
+//implementasi dari  fungsi yang digunakan untuk meng-handle request HTTP terkait dengan fitur-fitur dalam aplikasi.
+package controllers
 
 import (
-	"github.com/gin-gonic/gin" // Mengimport library gin yang digunakan untuk membuat server HTTP dengan Go.
-	"myGram/models"             // Mengimport package models yang berisi definisi model data aplikasi.
-	"myGram/utils"              // Mengimport package utils yang berisi utilitas yang digunakan dalam aplikasi.
+    "github.com/gin-gonic/gin"
+    "myGram/models"
+    "myGram/utils"
 )
 
-// CreateComment adalah fungsi untuk membuat komentar baru.
+// CreateComment --> fungsi untuk membuat komentar baru.
 func CreateComment(c *gin.Context) {
 	var comment models.Comment // Mendeklarasikan variabel comment yang akan menampung data komentar yang diterima dari client.
 
@@ -16,9 +17,9 @@ func CreateComment(c *gin.Context) {
 		return
 	}
 
-	// Implement validation and authorization logic here
+	// Implement validation and authorization logic ---> 
 	// Di sini biasanya dilakukan validasi terhadap data komentar dan juga otorisasi untuk menentukan apakah pengguna memiliki izin untuk membuat komentar.
-
+    // ...............
 	// Save comment to database (models.CreateComment)
 	// Di sini biasanya dilakukan penyimpanan data komentar ke dalam database dengan menggunakan fungsi CreateComment yang ada di dalam package models.
 
@@ -28,10 +29,10 @@ func CreateComment(c *gin.Context) {
 // GetComments adalah fungsi untuk mendapatkan daftar komentar.
 func GetComments(c *gin.Context) {
 	// Implement logic to retrieve comments from database
-	// Di sini biasanya dilakukan pengambilan data komentar dari database menggunakan fungsi GetComments yang ada di dalam package models.
+	//  pengambilan data komentar dari database menggunakan fungsi GetComments yang ada di dalam package models.
 
 	// comments := models.GetComments() // Mendapatkan daftar komentar dari database.
 
 	// Return comments as response
-	// Di sini biasanya daftar komentar yang telah didapatkan akan dikirimkan kembali
+	// daftar komentar yang telah didapatkan akan dikirimkan kembali
 }

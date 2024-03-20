@@ -1,0 +1,35 @@
+.container {
+    margin-top: 50px;
+}
+
+/* Style for photo cards */
+.card {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease-in-out;
+}
+
+.card:hover {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Style for card image */
+.card-img-top {
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    max-height: 200px; /* Limit the height of the image */
+    object-fit: cover; /* Ensure the image covers the entire card */
+}
+
+/* Style for card title */
+.card-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+}
+
+/* Style for card text */
+.card-text {
+    font-size: 1rem;
+    color: #666;
+}

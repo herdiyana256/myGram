@@ -1,16 +1,33 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"  // Import package gin untuk membuat server HTTP
-	"myGram/routes"             // Import package routes untuk mengatur rute HTTP
+    "github.com/gin-gonic/gin"
+    "gorm.io/driver/postgres"
+    "gorm.io/gorm"
+    "myGram/controllers"
+    "myGram/models"
+    "myGram/routes"
 )
 
 func main() {
-	r := gin.Default()  // Membuat instance router Gin dengan konfigurasi default
+    //  koneksi ke database PostgreSQL : myGram {}
+    dsn := "user=postgres password=Sitcomindo@123 dbname=mygram port=5432 sslmode=disable TimeZone=Asia/Jakarta"
+    db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+    if err != nil {
+        panic("failed to connect to database")
+    }
 
-	// Konfigurasi routes menggunakan fungsi SetupRoutes dari package routes
-	routes.SetupRoutes(r)
+    // Auto migrasi model-model ....
+    db.AutoMigrate(&models.User{}) //   membuat tabel user
 
-	// Menjalankan server HTTP pada port 8080
-	r.Run(":8080")
+    r := gin.Default()
+
+    // Serve static files (like index.html, CSS, JS)
+    r.Static("/static", "./static")
+
+    // Configure routes  ....
+    routes.SetupRoutes(r, db) //  koneksi database ke fungsi SetupRoutes
+
+    // Run the server
+    r.Run(":8080")
 }

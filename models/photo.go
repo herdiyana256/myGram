@@ -1,33 +1,86 @@
 package models
 
-// import (
-// 	"errors" // Mengimport package errors untuk menangani error dalam aplikasi.
-// 	"time"   // Mengimport package time untuk penggunaan tipe data waktu.
-// )
+import (
+    "errors"
+    "time"
+    "gorm.io/gorm"
+)
 
-// // Photo adalah struktur data yang merepresentasikan foto dalam aplikasi.
-// type Photo struct {
-// 	ID        uint      `gorm:"primaryKey"` // ID adalah identifikasi unik dari foto.
-// 	Title     string    `gorm:"not null"`   // Title adalah judul dari foto.
-// 	Caption   string    `gorm:"not null"`   // Caption adalah keterangan atau deskripsi dari foto.
-// 	PhotoURL  string    `gorm:"not null"`   // PhotoURL adalah URL tempat foto disimpan.
-// 	UserID    uint      `gorm:"not null"`   // UserID adalah ID pengguna yang mengunggah foto.
-// 	CreatedAt time.Time `gorm:"autoCreateTime"` // CreatedAt adalah waktu pembuatan foto.
-// 	UpdatedAt time.Time `gorm:"autoUpdateTime"` // UpdatedAt adalah waktu terakhir kali foto diperbarui.
-// }
+// Struktur data Photo
+type Photo struct {
+    ID        uint      `gorm:"primaryKey"` // ID adalah identifikasi unik dari foto.
+    Title     string    `gorm:"not null"`   // Title adalah judul atau nama dari foto.
+    Caption   string    `gorm:"not null"`   // Caption adalah deskripsi atau keterangan dari foto.
+    PhotoURL  string    `gorm:"not null"`   // PhotoURL adalah URL atau lokasi file foto.
+    UserID    uint      `gorm:"not null"`   // UserID adalah ID pengguna yang memiliki foto ini.
+    CreatedAt time.Time `gorm:"autoCreateTime"` // CreatedAt adalah waktu pembuatan foto.
+    UpdatedAt time.Time `gorm:"autoUpdateTime"` // UpdatedAt adalah waktu terakhir kali foto diperbarui.
+}
 
-// // Validate adalah metode untuk melakukan validasi terhadap foto.
-// // Metode ini memeriksa apakah judul dan URL foto tidak kosong.
-// func (p *Photo) Validate() error {
-// 	if p.Title == "" {
-// 		return errors.New("title is required") // Jika judul foto kosong, maka akan dikembalikan error.
-// 	}
-// 	if p.PhotoURL == "" {
-// 		return errors.New("photo URL is required") // Jika URL foto kosong, maka akan dikembalikan error.
-// 	}
-// 	return nil // Jika validasi berhasil, tidak ada error yang dikembalikan.
-// }
+// Membuat foto baru
+func CreatePhoto(db *gorm.DB, title, caption, photoURL string, userID uint) (*Photo, error) {
+    photo := &Photo{
+        Title:    title,
+        Caption:  caption,
+        PhotoURL: photoURL,
+        UserID:   userID,
+    }
+    result := db.Create(&photo)
+    if result.Error != nil {
+        return nil, result.Error
+    }
+    return photo, nil
+}
 
-// Implement database operations if needed
-// Implementasikan operasi-operasi database jika diperlukan.
-// Operasi-operasi database seperti membuat, membaca, memperbarui, dan menghapus foto dapat diimplementasikan di sini.
+// Mendapatkan semua foto
+func GetPhotos(db *gorm.DB) ([]*Photo, error) {
+    var photos []*Photo
+    result := db.Find(&photos)
+    if result.Error != nil {
+        return nil, result.Error
+    }
+    return photos, nil
+}
+
+// Memperbarui foto
+func UpdatePhoto(db *gorm.DB, id uint, title, caption, photoURL string) (*Photo, error) {
+    var photo Photo
+    result := db.First(&photo, id)
+    if result.Error != nil {
+        return nil, result.Error
+    }
+
+    photo.Title = title
+    photo.Caption = caption
+    photo.PhotoURL = photoURL
+
+    result = db.Save(&photo)
+    if result.Error != nil {
+        return nil, result.Error
+    }
+
+    return &photo, nil
+}
+
+// Menghapus foto
+func DeletePhoto(db *gorm.DB, id uint) error {
+    result := db.Delete(&Photo{}, id)
+    if result.Error != nil {
+        return result.Error
+    }
+    return nil
+}
+
+// Validasi data foto
+func (p *Photo) Validate() error {
+    if p.Title == "" {
+        return errors.New("title is required")
+    }
+    if p.Caption == "" {
+        return errors.New("caption is required")
+    }
+    if p.PhotoURL == "" {
+        return errors.New("photo URL is required")
+    }
+    return nil
+}

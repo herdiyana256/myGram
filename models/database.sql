@@ -1,4 +1,3 @@
--- Buat database myGram
 CREATE DATABASE myGram;
 
 

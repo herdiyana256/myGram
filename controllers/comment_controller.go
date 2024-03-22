@@ -1,4 +1,3 @@
-//implementasi dari  fungsi yang digunakan untuk meng-handle request HTTP terkait dengan fitur-fitur dalam aplikasi.
 package controllers
 
 import (
@@ -7,32 +6,48 @@ import (
     "myGram/utils"
 )
 
-// CreateComment --> fungsi untuk membuat komentar baru.
+// CreateComment adalah fungsi untuk membuat komentar baru.
 func CreateComment(c *gin.Context) {
-	var comment models.Comment // Mendeklarasikan variabel comment yang akan menampung data komentar yang diterima dari client.
+    var comment models.Comment
 
-	// Memeriksa dan melakukan binding data JSON yang diterima dari client ke dalam variabel comment.
-	if err := c.ShouldBindJSON(&comment); err != nil {
-		utils.BadRequest(c, "Invalid request body") // Jika terjadi error dalam binding data, maka respon error dikirimkan kembali ke client.
-		return
-	}
+    // Binding data JSON yang diterima dari client ke dalam variabel comment.
+    if err := c.ShouldBindJSON(&comment); err != nil {
+        utils.BadRequest(c, "Invalid request body")
+        return
+    }
 
-	// Implement validation and authorization logic ---> 
-	// Di sini biasanya dilakukan validasi terhadap data komentar dan juga otorisasi untuk menentukan apakah pengguna memiliki izin untuk membuat komentar.
-    // ...............
-	// Save comment to database (models.CreateComment)
-	// Di sini biasanya dilakukan penyimpanan data komentar ke dalam database dengan menggunakan fungsi CreateComment yang ada di dalam package models.
+    // Simpan komentar ke database
+    db, err := utils.GetDB()
+    if err != nil {
+        utils.InternalServerError(c, "Failed to connect to database")
+        return
+    }
+    createdComment, err := models.CreateComment(db, comment.UserID, comment.PhotoID, comment.Message)
+    if err != nil {
+        utils.InternalServerError(c, "Failed to create comment")
+        return
+    }
 
-	utils.Created(c, comment) // Mengirimkan respon berhasil ke client setelah komentar berhasil dibuat.
+    utils.Created(c, createdComment)
 }
 
 // GetComments adalah fungsi untuk mendapatkan daftar komentar.
 func GetComments(c *gin.Context) {
-	// Implement logic to retrieve comments from database
-	//  pengambilan data komentar dari database menggunakan fungsi GetComments yang ada di dalam package models.
+    // Mendapatkan daftar komentar dari database
+    db, err := utils.GetDB()
+    if err != nil {
+        utils.InternalServerError(c, "Failed to connect to database")
+        return
+    }
+    
+    // Mendapatkan photoID dari query parameter
+    photoID := c.Query("photoID")
+    
+    _, err = models.GetCommentsByPhotoID(db, photoID)
+    if err != nil {
+        utils.InternalServerError(c, "Failed to retrieve comments")
+        return
+    }
 
-	// comments := models.GetComments() // Mendapatkan daftar komentar dari database.
-
-	// Return comments as response
-	// daftar komentar yang telah didapatkan akan dikirimkan kembali
+    utils.OK(c) // Perbaiki pemanggilan utils.OK agar tidak memiliki argumen
 }

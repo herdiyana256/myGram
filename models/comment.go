@@ -1,28 +1,49 @@
 package models
 
-// import (
-//     "errors"
-//     "time"
-// )
+import (
+    "errors"
+    "time"
+    "gorm.io/gorm"
+)
 
-// type Comment struct {
-// 	ID        uint      `gorm:"primaryKey"` // ID adalah identifikasi unik dari komentar.
-// 	UserID    uint      `gorm:"not null"`   // UserID adalah ID pengguna yang membuat komentar.
-// 	PhotoID   uint      `gorm:"not null"`   // PhotoID adalah ID foto yang dikomentari.
-// 	Message   string    `gorm:"not null"`   // Message adalah pesan yang dituliskan dalam komentar.
-// 	CreatedAt time.Time `gorm:"autoCreateTime"` // CreatedAt adalah waktu pembuatan komentar.
-// 	UpdatedAt time.Time `gorm:"autoUpdateTime"` // UpdatedAt adalah waktu terakhir kali komentar diperbarui.
-// }
+// Comment adalah model untuk menyimpan data komentar.
+type Comment struct {
+    gorm.Model
+    UserID    uint      `json:"userId" gorm:"not null"` // UserID adalah ID pengguna yang membuat komentar.
+    PhotoID   uint      `json:"photoId" gorm:"not null"` // PhotoID adalah ID foto yang dikomentari.
+    Message   string    `json:"message" gorm:"not null"` // Message adalah pesan yang dituliskan dalam komentar.
+    CreatedAt time.Time `json:"createdAt" gorm:"autoCreateTime"` // CreatedAt adalah waktu pembuatan komentar.
+    UpdatedAt time.Time `json:"updatedAt" gorm:"autoUpdateTime"` // UpdatedAt adalah waktu terakhir kali komentar diperbarui.
+}
 
+// Membuat komentar baru
+func CreateComment(db *gorm.DB, userID, photoID uint, message string) (*Comment, error) {
+    comment := &Comment{
+        UserID:  userID,
+        PhotoID: photoID,
+        Message: message,
+    }
+    result := db.Create(&comment)
+    if result.Error != nil {
+        return nil, result.Error
+    }
+    return comment, nil
+}
 
-// // Metode ini memeriksa apakah pesan komentar tidak kosong.
-// func (c *Comment) Validate() error {
-// 	if c.Message == "" {
-// 		return errors.New("message is required") // Jika pesan komentar kosong, maka akan dikembalikan error.
-// 	}
-// 	return nil // Jika validasi berhasil, tidak ada error yang dikembalikan.
-// }
+// Mendapatkan semua komentar berdasarkan ID foto
+func GetCommentsByPhotoID(db *gorm.DB, photoID string) ([]*Comment, error) {
+    var comments []*Comment
+    result := db.Where("photo_id = ?", photoID).Find(&comments)
+    if result.Error != nil {
+        return nil, result.Error
+    }
+    return comments, nil
+}
 
-// Implement database operations if needed
-// Implementasikan operasi-operasi database jika diperlukan.
-// Operasi-operasi database seperti membuat, membaca, memperbarui, dan menghapus komentar dapat diimplementasikan ....
+// Validasi pesan komentar
+func (c *Comment) Validate() error {
+    if c.Message == "" {
+        return errors.New("message is required")
+    }
+    return nil
+}

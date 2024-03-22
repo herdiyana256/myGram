@@ -1,35 +1,56 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #fafafa;
+}
+
 .container {
-    margin-top: 50px;
+    max-width: 400px;
+    margin: 100px auto;
 }
 
-/* Style for photo cards */
 .card {
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    transition: box-shadow 0.3s ease-in-out;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-.card:hover {
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+.card-body {
+    padding: 30px;
 }
 
-/* Style for card image */
-.card-img-top {
-    border-top-left-radius: 5px;
-    border-top-right-radius: 5px;
-    max-height: 200px; /* Limit the height of the image */
-    object-fit: cover; /* Ensure the image covers the entire card */
-}
-
-/* Style for card title */
 .card-title {
-    font-size: 1.25rem;
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
     font-weight: bold;
 }
 
-/* Style for card text */
-.card-text {
-    font-size: 1rem;
-    color: #666;
+.form-control {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+    width: 100%;
+}
+
+.btn-primary {
+    background-color: #0095f6;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 0;
+    cursor: pointer;
+}
+
+.btn-primary:hover {
+    background-color: #007bb5;
+}
+
+.text-center {
+    text-align: center;
 }
